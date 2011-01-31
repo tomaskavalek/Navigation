@@ -36,6 +36,9 @@ Autor: Tomáš Kavalek
 Jednoduché použití při práci s databází
 ---------------------------------------
 
+Vývojová verze - autor bez odpovědnosti! :-)
+
+
 Příklad jednoduché tabulky:
 
 +---------+------------------------------------+-------------------------------+ 
@@ -45,26 +48,27 @@ Příklad jednoduché tabulky:
 | name    | varchar(255)                       | titulek odkazu                |
 | link    | varchar(255)                       | odkaz na presenter a action   |
 | params  | varchar(255) NULL                  | případné parametry v JSON     |
+| order   | tinyint(3) unsigned Default 0      | pořadí                        |
 +---------+------------------------------------+-------------------------------+
 
-id	parent	name		link					params
-1	0		Oddělení	Default:showPage		{"id":1}
-2	0		Kontakt		Default:showContact		NULL
-3	1		IT			Default:showPage		{"id":2}
-4	1		Ekonomické	Default:showPage		{"id":3}
-5	3		Podpora		Default:showPage		{"id":4}
-6	3		Prodej		Default:showSitemap		{"id":5}
+id  parent  name        link                    params    order
+1   0       Oddělení    Default:showPage        {"id":1}  1
+2   0       Kontakt     Default:showContact     NULL      2 
+3   1       IT          Default:showPage        {"id":2}  1
+4   1       Ekonomické  Default:showPage        {"id":3}  2
+5   3       Podpora     Default:showPage        {"id":4}  1
+6   3       Prodej      Default:showSitemap     {"id":5}  2
 
 Továrnička v presenteru:
 
 protected function createComponentNavigation($name) {
 	// Načtení z DB je lepší mít v modelu
-	// Do DB lze vhodně přiřadit další atributy, např. pořadí (order)
-	$items = $this->db->select('`menu`.*')
-		->from('`menu`')
-		->orderBy('`menu`.`id`')
-		->fetchAll();
-	
+	$items = $this->db->select('menu1.*')
+				->setFlag('distinct')
+				->from('menu')->as('menu1')
+				->leftJoin('menu')->as('menu2')
+				->on('menu1.id = menu2.parent')
+				->orderBy('menu1.`parent`, menu1.`order`');
 	
 	$navigation = new Navigation($this, $name);
 	
