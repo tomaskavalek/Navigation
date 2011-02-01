@@ -31,6 +31,7 @@ protected function createComponentNavigation($name) {
 	}
 	
 	if(isset($current)) $navigation->setCurrent($current);
+	else $navigation->setCurrent($navigation['homepage']);
 }
 
 /*
